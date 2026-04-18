@@ -25,7 +25,7 @@ private enum CardTransition: CaseIterable {
 
 struct FlashCardView: View {
     @ObservedObject var speech: SpeechManager
-    let userName: String
+    @ObservedObject var settings: UserSettings
     let wordList: [String]
     let onConfigTap: () -> Void
 
@@ -44,9 +44,9 @@ struct FlashCardView: View {
     // Password sheet
     @State private var showPasswordSheet = false
 
-    init(speech: SpeechManager, userName: String, wordList: [String], onConfigTap: @escaping () -> Void) {
+    init(speech: SpeechManager, settings: UserSettings, wordList: [String], onConfigTap: @escaping () -> Void) {
         self.speech = speech
-        self.userName = userName
+        self.settings = settings
         self.wordList = wordList
         self.onConfigTap = onConfigTap
         let first = wordList.randomElement() ?? DolchWords.words[0]
@@ -308,7 +308,8 @@ private struct PasswordSheet: View {
             Spacer()
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { focused = true }
+            focused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { focused = true }
         }
     }
 

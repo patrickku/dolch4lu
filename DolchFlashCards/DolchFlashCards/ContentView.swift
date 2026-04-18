@@ -14,6 +14,7 @@ struct ContentView: View {
                 // Only leave this screen by pressing Go! (which calls confirm())
                 WordSelectionView(
                     selectedWords: selectedWords,
+                    settings: settings,
                     onDone: {
                         selectedWords.confirm()
                         showWordSelection = false
@@ -22,7 +23,7 @@ struct ContentView: View {
             } else {
                 FlashCardView(
                     speech: speech,
-                    userName: settings.userName,
+                    settings: settings,
                     wordList: Array(selectedWords.confirmedWords),
                     onConfigTap: { showWordSelection = true }
                 )
