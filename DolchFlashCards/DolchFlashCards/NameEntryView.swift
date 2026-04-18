@@ -36,6 +36,7 @@ struct NameEntryView: View {
                     .padding(.horizontal, 20)
                     .background(Color.white)
                     .cornerRadius(18)
+                    .colorScheme(.light)   // force dark text on white background
                     .padding(.horizontal, 40)
                     .focused($fieldFocused)
                     .submitLabel(.done)

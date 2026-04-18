@@ -15,6 +15,8 @@
 		CC000000000000000000006 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000006 /* SpeechManager.swift */; };
 		CC000000000000000000007 /* UserSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000007 /* UserSettings.swift */; };
 		CC000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB000000000000000000008 /* Assets.xcassets */; };
+		CC000000000000000000009 /* SelectedWords.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000000A /* SelectedWords.swift */; };
+		CC00000000000000000000A /* WordSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000000000000000000B /* WordSelectionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 		BB000000000000000000007 /* UserSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettings.swift; sourceTree = "<group>"; };
 		BB000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB000000000000000000009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BB00000000000000000000A /* SelectedWords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedWords.swift; sourceTree = "<group>"; };
+		BB00000000000000000000B /* WordSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSelectionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +65,8 @@
 				BB000000000000000000007 /* UserSettings.swift */,
 				BB000000000000000000008 /* Assets.xcassets */,
 				BB000000000000000000009 /* Info.plist */,
+				BB00000000000000000000A /* SelectedWords.swift */,
+				BB00000000000000000000B /* WordSelectionView.swift */,
 			);
 			path = DolchFlashCards;
 			sourceTree = "<group>";
@@ -149,6 +155,8 @@
 				CC000000000000000000005 /* DolchWords.swift in Sources */,
 				CC000000000000000000006 /* SpeechManager.swift in Sources */,
 				CC000000000000000000007 /* UserSettings.swift in Sources */,
+				CC000000000000000000009 /* SelectedWords.swift in Sources */,
+				CC00000000000000000000A /* WordSelectionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,12 +287,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = D6V84WA8VJ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DolchFlashCards/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dolch4lu.DolchFlashCards";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dolch4lu.DolchFlashCards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -300,12 +308,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = D6V84WA8VJ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DolchFlashCards/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.dolch4lu.DolchFlashCards";
+				PRODUCT_BUNDLE_IDENTIFIER = com.dolch4lu.DolchFlashCards;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -336,7 +344,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = AA000000000000000000001 /* Project object */;
 }

@@ -5,16 +5,6 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     private let synthesizer = AVSpeechSynthesizer()
     @Published var isSpeaking = false
 
-    private let promptVariations = [
-        "What is this word?",
-        "Say this word out loud.",
-        "Can you read this word?",
-        "What does this word say?",
-        "Try reading this word!",
-        "Do you know this word?",
-        "What word do you see?"
-    ]
-
     override init() {
         super.init()
         synthesizer.delegate = self
@@ -27,17 +17,6 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     }
 
     // MARK: - Public API
-
-    func greetAndPrompt(name: String) {
-        let prompt = promptVariations.randomElement()!
-        let text = "Hi \(name)! \(prompt)"
-        utter(text, rate: 0.44, pitch: 1.1)
-    }
-
-    func promptForWord() {
-        let prompt = promptVariations.randomElement()!
-        utter(prompt, rate: 0.44, pitch: 1.1)
-    }
 
     func speakWord(_ word: String) {
         utter(word, rate: 0.38, pitch: 1.0)

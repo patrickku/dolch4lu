@@ -5,9 +5,14 @@ import SwiftUI
 struct WordSelectionView: View {
     @ObservedObject var selectedWords: SelectedWords
     let onDone: () -> Void
-    let onCancel: (() -> Void)?
 
-    private let columns = [GridItem(.adaptive(minimum: 88, maximum: 128), spacing: 10)]
+    // The grid uses 1pt spacing and a gray container bg to produce hairline dividers.
+    private let columns = [GridItem(.adaptive(minimum: 78, maximum: 120), spacing: 1)]
+    private let dividerColor = Color(red: 0.78, green: 0.78, blue: 0.82)
+
+    private var buttonLabel: String {
+        selectedWords.words == selectedWords.confirmedWords ? "Go Back!" : "Go!"
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -15,26 +20,12 @@ struct WordSelectionView: View {
 
             VStack(spacing: 0) {
                 // Header
-                ZStack {
-                    Text("Choose Words")
-                        .font(.system(size: 24, weight: .black, design: .rounded))
-                        .foregroundColor(Color(red: 0.40, green: 0.16, blue: 0.82))
-
-                    HStack {
-                        if let cancel = onCancel {
-                            Button(action: cancel) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 28))
-                                    .foregroundColor(Color(.systemGray3))
-                            }
-                            .padding(.leading, 16)
-                        }
-                        Spacer()
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 20)
-                .padding(.bottom, 12)
+                Text("Choose Words")
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundColor(Color(red: 0.40, green: 0.16, blue: 0.82))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 20)
+                    .padding(.bottom, 12)
 
                 // Select All / Clear / Count row
                 HStack(spacing: 12) {
@@ -65,29 +56,37 @@ struct WordSelectionView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 12)
+                .padding(.bottom, 10)
 
-                // Word grid
+                // Word grid — no outer horizontal padding so it runs edge-to-edge.
+                // The 1pt spacing + dividerColor background creates hairline dividers.
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 10) {
+                    LazyVGrid(columns: columns, spacing: 1) {
                         ForEach(DolchWords.words, id: \.self) { word in
-                            WordChip(
+                            WordCell(
                                 word: word,
                                 isSelected: selectedWords.words.contains(word),
                                 onTap: { selectedWords.toggle(word) }
                             )
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .background(dividerColor)
+                    // Top hairline above the grid
+                    .overlay(
+                        Rectangle()
+                            .frame(height: 1)
+                            .foregroundColor(dividerColor),
+                        alignment: .top
+                    )
                     .padding(.bottom, 110)
                 }
             }
 
-            // Go! button — sticky at bottom
+            // Go! / Go Back! button — sticky at bottom
             Button(action: onDone) {
                 HStack(spacing: 10) {
                     Image(systemName: "play.fill")
-                    Text("Go!")
+                    Text(buttonLabel)
                 }
                 .font(.system(size: 26, weight: .black, design: .rounded))
                 .foregroundColor(.white)
@@ -100,6 +99,7 @@ struct WordSelectionView: View {
                 )
                 .cornerRadius(18)
                 .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 4)
+                .animation(.easeInOut(duration: 0.15), value: buttonLabel)
             }
             .disabled(selectedWords.isEmpty)
             .animation(.easeInOut(duration: 0.18), value: selectedWords.isEmpty)
@@ -109,42 +109,22 @@ struct WordSelectionView: View {
     }
 }
 
-// MARK: - Word Chip
+// MARK: - Word Cell
 
-struct WordChip: View {
+struct WordCell: View {
     let word: String
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            Text(word)
-                .font(.system(size: 17, weight: isSelected ? .bold : .regular, design: .rounded))
-                .foregroundColor(isSelected ? .white : Color(red: 0.18, green: 0.18, blue: 0.22))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 9)
-                .frame(maxWidth: .infinity)
-                .background(
-                    isSelected
-                        ? Color(red: 0.40, green: 0.16, blue: 0.82)
-                        : Color.white
-                )
-                .cornerRadius(11)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 11)
-                        .stroke(
-                            isSelected ? Color.clear : Color(red: 0.84, green: 0.84, blue: 0.88),
-                            lineWidth: 1
-                        )
-                )
-                .shadow(
-                    color: isSelected
-                        ? Color(red: 0.40, green: 0.16, blue: 0.82).opacity(0.35)
-                        : Color.black.opacity(0.06),
-                    radius: isSelected ? 5 : 2,
-                    x: 0, y: 2
-                )
-        }
-        .animation(.spring(response: 0.22, dampingFraction: 0.72), value: isSelected)
+        Text(word)
+            .font(.system(size: 16, weight: isSelected ? .bold : .regular, design: .rounded))
+            .foregroundColor(isSelected ? .white : Color(red: 0.18, green: 0.18, blue: 0.22))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .background(isSelected ? Color(red: 0.40, green: 0.16, blue: 0.82) : Color.white)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onTap)
+            .animation(.easeInOut(duration: 0.13), value: isSelected)
     }
 }

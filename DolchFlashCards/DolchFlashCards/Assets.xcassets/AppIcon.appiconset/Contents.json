@@ -1,20 +1,10 @@
 {
   "images" : [
     {
-      "filename" : "",
+      "filename" : "AppIcon.png",
       "idiom" : "universal",
       "platform" : "ios",
-      "scale" : "1x"
-    },
-    {
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "2x"
-    },
-    {
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "3x"
+      "size" : "1024x1024"
     }
   ],
   "info" : {

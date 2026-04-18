@@ -15,12 +15,16 @@ struct DolchWords {
     ]
 
     static func random(excluding current: String? = nil) -> String {
-        guard words.count > 1, let current = current else {
-            return words.randomElement()!
-        }
+        return random(from: words, excluding: current)
+    }
+
+    static func random(from pool: [String], excluding current: String? = nil) -> String {
+        guard !pool.isEmpty else { return "?" }
+        if pool.count == 1 { return pool[0] }
+        guard let current = current else { return pool.randomElement()! }
         var next: String
         repeat {
-            next = words.randomElement()!
+            next = pool.randomElement()!
         } while next == current
         return next
     }

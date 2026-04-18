@@ -26,10 +26,12 @@ private enum CardTransition: CaseIterable {
 struct FlashCardView: View {
     @ObservedObject var speech: SpeechManager
     let userName: String
+    let wordList: [String]
+    let onConfigTap: () -> Void
 
     @State private var currentWord: String
     @State private var bgColor: Color
-    @State private var colorIndex: Int = 0
+    @State private var colorIndex: Int
 
     // Animation state
     @State private var wordScale: CGFloat = 1.0
@@ -38,16 +40,20 @@ struct FlashCardView: View {
     @State private var wordRotationZ: Double = 0
     @State private var wordOffsetY: CGFloat = 0
     @State private var isTransitioning = false
-    @State private var hasGreeted = false
 
-    init(speech: SpeechManager, userName: String) {
+    // Password sheet
+    @State private var showPasswordSheet = false
+
+    init(speech: SpeechManager, userName: String, wordList: [String], onConfigTap: @escaping () -> Void) {
         self.speech = speech
         self.userName = userName
-        let first = DolchWords.random()
-        let startIndex = Int.random(in: 0..<Color.cardColors.count)
+        self.wordList = wordList
+        self.onConfigTap = onConfigTap
+        let first = wordList.randomElement() ?? DolchWords.words[0]
+        let startIdx = Int.random(in: 0..<Color.cardColors.count)
         _currentWord = State(initialValue: first)
-        _colorIndex = State(initialValue: startIndex)
-        _bgColor = State(initialValue: Color.cardColors[startIndex])
+        _colorIndex = State(initialValue: startIdx)
+        _bgColor = State(initialValue: Color.cardColors[startIdx])
     }
 
     var body: some View {
@@ -57,7 +63,7 @@ struct FlashCardView: View {
                 bgColor
                     .ignoresSafeArea()
 
-                // Full-screen tap target
+                // Full-screen tap target (excludes the gear button area)
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -88,7 +94,22 @@ struct FlashCardView: View {
                     Spacer()
                 }
 
-                // Hear-word button — bottom trailing, large tap area
+                // Gear button — top left (password-protected)
+                VStack {
+                    HStack {
+                        Button(action: { showPasswordSheet = true }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(.white.opacity(0.45))
+                                .padding(20)
+                        }
+                        .contentShape(Rectangle())
+                        Spacer()
+                    }
+                    Spacer()
+                }
+
+                // Hear-word button — bottom trailing
                 VStack {
                     Spacer()
                     HStack {
@@ -101,7 +122,7 @@ struct FlashCardView: View {
                                 Image(systemName: "speaker.wave.3.fill")
                                     .font(.system(size: 30, weight: .semibold))
                                     .foregroundColor(.white)
-                                    .opacity(speech.isSpeaking ? 0.6 : 1.0)
+                                    .opacity(speech.isSpeaking ? 0.55 : 1.0)
                                     .animation(.easeInOut(duration: 0.3), value: speech.isSpeaking)
                             }
                         }
@@ -112,13 +133,8 @@ struct FlashCardView: View {
                 }
             }
         }
-        .onAppear {
-            guard !hasGreeted else { return }
-            hasGreeted = true
-            // Slight delay so the word is visible before speech
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                speech.greetAndPrompt(name: userName)
-            }
+        .sheet(isPresented: $showPasswordSheet) {
+            PasswordSheet(isPresented: $showPasswordSheet, onSuccess: onConfigTap)
         }
     }
 
@@ -142,7 +158,7 @@ struct FlashCardView: View {
         speech.stop()
 
         let style = CardTransition.allCases.randomElement()!
-        let newWord = DolchWords.random(excluding: currentWord)
+        let newWord = DolchWords.random(from: wordList, excluding: currentWord)
         var newColorIndex: Int
         repeat {
             newColorIndex = Int.random(in: 0..<Color.cardColors.count)
@@ -157,90 +173,153 @@ struct FlashCardView: View {
         }
     }
 
-    // Flip card like turning over a flashcard
     private func playFlip(newWord: String, newColor: Color, newIndex: Int) {
         withAnimation(.easeIn(duration: 0.22)) {
             wordRotationY = 90
             wordOpacity = 0.1
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.23) {
-            currentWord = newWord
-            bgColor = newColor
-            colorIndex = newIndex
+            currentWord = newWord; bgColor = newColor; colorIndex = newIndex
             wordRotationY = -90
             withAnimation(.spring(response: 0.38, dampingFraction: 0.7)) {
-                wordRotationY = 0
-                wordOpacity = 1.0
+                wordRotationY = 0; wordOpacity = 1.0
             }
-            schedulePrompt()
+            finishTransition()
         }
     }
 
-    // Zoom out then pop in with a bounce
     private func playZoomBounce(newWord: String, newColor: Color, newIndex: Int) {
         withAnimation(.easeIn(duration: 0.18)) {
-            wordScale = 0.05
-            wordOpacity = 0
+            wordScale = 0.05; wordOpacity = 0
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.19) {
-            currentWord = newWord
-            bgColor = newColor
-            colorIndex = newIndex
+            currentWord = newWord; bgColor = newColor; colorIndex = newIndex
             wordScale = 0.05
             withAnimation(.spring(response: 0.42, dampingFraction: 0.55)) {
-                wordScale = 1.0
-                wordOpacity = 1.0
+                wordScale = 1.0; wordOpacity = 1.0
             }
-            schedulePrompt()
+            finishTransition()
         }
     }
 
-    // Slide old word up and new word comes from below
     private func playSlideUp(newWord: String, newColor: Color, newIndex: Int) {
         withAnimation(.easeIn(duration: 0.20)) {
-            wordOffsetY = -500
-            wordOpacity = 0
+            wordOffsetY = -500; wordOpacity = 0
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.21) {
-            currentWord = newWord
-            bgColor = newColor
-            colorIndex = newIndex
-            wordOffsetY = 500
-            wordOpacity = 0
+            currentWord = newWord; bgColor = newColor; colorIndex = newIndex
+            wordOffsetY = 500; wordOpacity = 0
             withAnimation(.spring(response: 0.40, dampingFraction: 0.68)) {
-                wordOffsetY = 0
-                wordOpacity = 1.0
+                wordOffsetY = 0; wordOpacity = 1.0
             }
-            schedulePrompt()
+            finishTransition()
         }
     }
 
-    // Spin and scale
     private func playSpinScale(newWord: String, newColor: Color, newIndex: Int) {
         withAnimation(.easeIn(duration: 0.22)) {
-            wordScale = 0.1
-            wordRotationZ = 180
-            wordOpacity = 0
+            wordScale = 0.1; wordRotationZ = 180; wordOpacity = 0
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.23) {
-            currentWord = newWord
-            bgColor = newColor
-            colorIndex = newIndex
-            wordRotationZ = -180
-            wordScale = 0.1
+            currentWord = newWord; bgColor = newColor; colorIndex = newIndex
+            wordRotationZ = -180; wordScale = 0.1
             withAnimation(.spring(response: 0.45, dampingFraction: 0.60)) {
-                wordScale = 1.0
-                wordRotationZ = 0
-                wordOpacity = 1.0
+                wordScale = 1.0; wordRotationZ = 0; wordOpacity = 1.0
             }
-            schedulePrompt()
+            finishTransition()
         }
     }
 
-    private func schedulePrompt() {
+    private func finishTransition() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             isTransitioning = false
-            speech.promptForWord()
+        }
+    }
+}
+
+// MARK: - Password Sheet
+
+private struct PasswordSheet: View {
+    @Binding var isPresented: Bool
+    let onSuccess: () -> Void
+
+    @State private var input = ""
+    @State private var showError = false
+    @FocusState private var focused: Bool
+
+    private let correctPassword = "Lucia"
+
+    var body: some View {
+        VStack(spacing: 28) {
+            Spacer()
+
+            Image(systemName: "lock.fill")
+                .font(.system(size: 44))
+                .foregroundColor(Color(red: 0.40, green: 0.16, blue: 0.82))
+
+            Text("Teacher Access")
+                .font(.system(size: 28, weight: .black, design: .rounded))
+                .foregroundColor(Color(.secondaryLabel))
+
+            VStack(spacing: 10) {
+                SecureField("Password", text: $input)
+                    .font(.system(size: 22, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 20)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(14)
+                    .focused($focused)
+                    .onSubmit { verify() }
+
+                if showError {
+                    Text("Incorrect password. Try again.")
+                        .font(.system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(.red)
+                        .transition(.opacity)
+                }
+            }
+            .padding(.horizontal, 32)
+            .animation(.easeInOut(duration: 0.2), value: showError)
+
+            HStack(spacing: 14) {
+                Button("Cancel") {
+                    isPresented = false
+                }
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundColor(Color(.systemGray))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(Color(.systemGray5))
+                .cornerRadius(14)
+
+                Button("Enter") { verify() }
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(input.isEmpty ? Color(.systemGray3) : Color(red: 0.40, green: 0.16, blue: 0.82))
+                    .cornerRadius(14)
+                    .disabled(input.isEmpty)
+                    .animation(.easeInOut(duration: 0.15), value: input.isEmpty)
+            }
+            .padding(.horizontal, 32)
+
+            Spacer()
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { focused = true }
+        }
+    }
+
+    private func verify() {
+        if input == correctPassword {
+            isPresented = false
+            onSuccess()
+        } else {
+            withAnimation { showError = true }
+            input = ""
+            focused = true
         }
     }
 }
